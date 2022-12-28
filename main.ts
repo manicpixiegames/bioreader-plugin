@@ -109,7 +109,7 @@ export function makeBioReaderWord(word: string) {
 }
 
 export function makeBioReaderParagraph(wordArray: string[]) {
-	let returnArray: string[] = [];
+	const returnArray: string[] = [];
 	wordArray.forEach((word) => {
 		returnArray.push(makeBioReaderWord(word));
 	});
