@@ -93,7 +93,83 @@ export class Emoji extends MarkdownRenderChild {
 	}
 }
 
-export function makeBioReaderWord(word: string) {
+const hyphen = "-";
+const enDash = "–";
+
+const symbols = [
+	".",
+	"?",
+	"!",
+	",",
+	"`",
+	'"',
+	"'",
+	";",
+	":",
+	"/",
+	"\\",
+	"<",
+	">",
+	"[",
+	"]",
+	"{",
+	"}",
+	"(",
+	")",
+	"*",
+	"&",
+	"^",
+	"%",
+	"#",
+	"@",
+	"~",
+	"_",
+	"=",
+	"+",
+	"|",
+	"—",
+	"“",
+	"”",
+	"‘",
+	"’",
+	hyphen,
+	enDash,
+];
+
+export function reverseString(aString: string) {
+	return aString.split("").reverse().join("");
+}
+
+export function handleLeadingandTrailingSymbols(word: string) {
+	const leadingSymbols = [];
+	let remainingString = "";
+	for (const letter of word) {
+		if (symbols.includes(letter)) {
+			leadingSymbols.push(letter);
+		} else {
+			remainingString = word.substring(word.indexOf(letter), word.length);
+			break;
+		}
+	}
+	const trailingSymbols = [];
+	let reversedString = reverseString(remainingString);
+	for (const letter of reversedString) {
+		if (symbols.includes(letter)) {
+			trailingSymbols.push(letter);
+		} else {
+			reversedString = reversedString.substring(
+				reversedString.indexOf(letter),
+				reversedString.length
+			);
+			break;
+		}
+	}
+	remainingString = reverseString(reversedString);
+	trailingSymbols.reverse();
+	return { leadingSymbols, trailingSymbols, remainingString };
+}
+
+export function handleBolding(word: string) {
 	if (word.length === 0) return "";
 	if (word.length === 1) return `<strong>${word}</strong>`;
 	if (word.length === 3)
@@ -106,6 +182,40 @@ export function makeBioReaderWord(word: string) {
 		0,
 		halfwayIndex
 	)}</strong><span>${word.substring(halfwayIndex, word.length)}</span>`;
+}
+
+export function makeBioReaderWord(word: string) {
+	console.log("start");
+	// remove any leading or trailing symbols (except dashes)
+	const { leadingSymbols, trailingSymbols, remainingString } =
+		handleLeadingandTrailingSymbols(word);
+	console.log("remaining string: " + remainingString);
+	const hasLeadingSymbols = leadingSymbols.length !== 0;
+	const hasTrailingSymbols = trailingSymbols.length !== 0;
+	//handle dashes
+	const hasDashes =
+		remainingString.includes(hyphen) || remainingString.includes(enDash);
+	// handle email addresses
+	const isEmailAddress = remainingString.includes("@");
+	if (hasDashes) {
+		//
+		return "";
+	} else if (isEmailAddress) {
+		//
+		return "";
+	} else {
+		const boldedWord = handleBolding(remainingString);
+		let htmlToReturn = boldedWord;
+		if (hasLeadingSymbols) {
+			htmlToReturn =
+				`<span>${leadingSymbols.join("")}</span>` + htmlToReturn;
+		}
+		if (hasTrailingSymbols) {
+			htmlToReturn =
+				htmlToReturn + `<span>${trailingSymbols.join("")}</span>`;
+		}
+		return htmlToReturn;
+	}
 }
 
 export function makeBioReaderParagraph(wordArray: string[]) {
